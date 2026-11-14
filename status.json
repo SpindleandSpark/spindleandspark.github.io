@@ -1,0 +1,119 @@
+{
+ "generated_at": 1795275613.881166,
+ "generated_iso": "2026-11-21T15:40:13.881166Z",
+ "laptop": "DESKTOP-VKRMBR2",
+ "services": {
+  "dashboard": false,
+  "weekly_research_schedule": false,
+  "brain_window_open": false
+ },
+ "episodes": [
+  "car-differential",
+  "jet-engine",
+  "petrol-pump",
+  "vending-machine"
+ ],
+ "bots": [
+  {
+   "id": "brain",
+   "name": "The Brain",
+   "role": "Production supervisor (Claude Code)",
+   "last": 1795194334.9409149,
+   "episode": "vending-machine",
+   "state": "off",
+   "note": "Window closed (starts when you run a brain-*.cmd)"
+  },
+  {
+   "id": "researcher",
+   "name": "Researcher",
+   "role": "Finds topics, facts and sources",
+   "last": 1794635488.1280816,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "schedule": "Weekly research schedule not installed"
+  },
+  {
+   "id": "director-3d",
+   "name": "Director 3D",
+   "role": "Drawings, 3D lab scenes, camera",
+   "last": 1794991303.6882434,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "scriptwriter",
+   "name": "Scriptwriter",
+   "role": "Writes the 8-minute script",
+   "last": 1794642334.582711,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "fact-checker",
+   "name": "Fact-checker",
+   "role": "Checks every claim against sources",
+   "last": 1794642311.2762444,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "voice",
+   "name": "Voice (George)",
+   "role": "Records the narration",
+   "last": 1794823657.4475493,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "editor",
+   "name": "Editor",
+   "role": "Films frames, edits, mixes, encodes",
+   "last": 1794995353.093,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "running ffmpeg"
+  },
+  {
+   "id": "thumbnail",
+   "name": "Thumbnail",
+   "role": "Designs thumbnails",
+   "last": 1794989416.5465636,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "qa-reviewer",
+   "name": "QA Reviewer",
+   "role": "Runs quality checks",
+   "last": 1794992832.3578205,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "publisher",
+   "name": "Publisher",
+   "role": "Uploads to YouTube (private)",
+   "last": null,
+   "episode": "",
+   "state": "blocked",
+   "note": "YouTube API not set up yet: uploads are manual"
+  }
+ ],
+ "feed": [
+  {
+   "t": 1794995353.093,
+   "kind": "run",
+   "to": "editor",
+   "task": "running ffmpeg",
+   "name": "Editor"
+  }
+ ]
+}
