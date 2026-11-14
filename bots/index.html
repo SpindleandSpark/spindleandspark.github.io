@@ -34,6 +34,19 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:18px;justify-content:s
 .s-off{color:var(--muted);background:rgba(143,163,181,.08)}.s-blocked{color:var(--amber);background:rgba(255,181,62,.12)}.s-unknown{color:var(--muted);background:rgba(143,163,181,.08)}
 @keyframes blink{50%{opacity:.25}}
 .meta{margin-top:10px;font-size:12.5px;color:var(--steel);line-height:1.5}.meta em{color:var(--muted);font-style:normal}
+
+h3{margin:26px 0 12px;font:700 12px/1 ui-monospace,Consolas,monospace;letter-spacing:.24em;color:var(--blue)}
+.line{position:relative;background:linear-gradient(180deg,#0c1520,#080d14);border:1px solid var(--line);border-radius:18px;padding:14px 10px 10px;overflow-x:auto}
+.line svg{display:block;min-width:900px;width:100%;height:auto}
+.feed{background:linear-gradient(180deg,#0c1520,#080d14);border:1px solid var(--line);border-radius:18px;padding:6px 16px}
+.ev{display:grid;grid-template-columns:62px 26px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(94,229,255,.08);font-size:14px}
+.ev:last-child{border-bottom:0}.ev time{color:var(--muted);font:600 12px ui-monospace,Consolas,monospace}
+.ev .k{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800}
+.k-handoff{background:rgba(94,229,255,.14);color:var(--blue)}.k-done{background:rgba(62,240,160,.14);color:var(--green)}.k-run,.k-work{background:rgba(209,218,227,.1);color:var(--steel)}
+.ev b{color:var(--ink)}.ev span{color:var(--muted)}
+.task{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(94,229,255,.08);border:1px solid rgba(94,229,255,.25);font-size:12.5px;color:var(--ink)}
+.task i{font-style:normal;color:var(--blue);font:700 10px ui-monospace,Consolas,monospace;letter-spacing:.16em;display:block;margin-bottom:3px}
+@keyframes flow{to{stroke-dashoffset:-24}}
 footer{margin-top:28px;color:var(--muted);font-size:12.5px;line-height:1.6}
 footer a{color:var(--blue)}
 .err{padding:16px;border:1px solid rgba(255,90,106,.4);border-radius:12px;color:#ffc3c9;background:rgba(255,90,106,.06);margin-bottom:18px;display:none}
@@ -45,11 +58,18 @@ footer a{color:var(--blue)}
 </header>
 <div class="err" id="err"></div>
 <div class="services" id="svcs"></div>
-<div class="grid" id="grid"></div>
-<footer>How this works: the studio laptop checks its bots every 10 minutes (open windows, files each bot has written, schedules) and publishes the result. <b>LIVE</b> means a report arrived in the last 15 minutes; if the laptop is off or asleep the page shows <b>OFFLINE</b> instead of guessing. Bots only work when the Brain gives them a job, so <b>READY</b> is their normal resting state.<br>Lab: <a href="../">spindleandspark.github.io</a> · YouTube: <a href="https://www.youtube.com/@SpindleAndSpark">@SpindleAndSpark</a></footer>
+<h3>PRODUCTION LINE · WHO HAS THE TASK</h3><div class="line" id="line"></div>
+<h3>BOTS</h3><div class="grid" id="grid"></div>
+<h3>HAND-OFF FEED · LATEST FIRST</h3><div class="feed" id="feed"><div class="ev"><span>No hand-offs recorded yet.</span></div></div>
+<footer>How this works: the studio laptop checks its bots every 2 minutes (the Brain's own activity log of every hand-off, the files each bot has written, open windows and schedules) and publishes the result. <b>LIVE</b> means a report arrived in the last 15 minutes; if the laptop is off or asleep the page shows <b>OFFLINE</b> instead of guessing. Bots only work when the Brain gives them a job, so <b>READY</b> is their normal resting state.<br>Lab: <a href="../">spindleandspark.github.io</a> · YouTube: <a href="https://www.youtube.com/@SpindleAndSpark">@SpindleAndSpark</a></footer>
 </div>
 <script>
-const SRC='https://raw.githubusercontent.com/spindleandspark/spindleandspark.github.io/status/status.json';
+const API='https://api.github.com/repos/spindleandspark/spindleandspark.github.io/contents/status.json?ref=status';
+const RAW='https://raw.githubusercontent.com/spindleandspark/spindleandspark.github.io/status/status.json';
+async function getStatus(){
+ try{ const r=await fetch(API+'&t='+Date.now(),{headers:{Accept:'application/vnd.github.raw+json'},cache:'no-store'}); if(r.ok) return await r.json(); }catch(e){}
+ const r=await fetch(RAW+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json();
+}
 const C={blue:'#5ee5ff',steel:'#d1dae3',ink:'#f4f8fb',dark:'#0d1620'};
 // Each bot: same family (round steel head, blue visor eyes, antenna spark) + its own tool on the chest.
 const TOOLS={
@@ -72,13 +92,24 @@ function botSVG(id,state){
  <rect x="22" y="21" width="36" height="16" rx="8" fill="${C.dark}"/><rect x="28" y="26" width="8" height="6" rx="3" fill="${eye}" filter="url(#f${id})"/><rect x="44" y="26" width="8" height="6" rx="3" fill="${eye}" filter="url(#f${id})"/><rect x="28" y="26" width="8" height="6" rx="3" fill="${eye}"/><rect x="44" y="26" width="8" height="6" rx="3" fill="${eye}"/>
  <rect x="22" y="45" width="36" height="31" rx="10" fill="#101b26" stroke="rgba(94,229,255,.35)"/>${TOOLS[id]||''}</svg>`;
 }
+function drawLine(bots,live){
+ const W=1100,H=230, bx=W/2, by=46; const others=bots.filter(b=>b.id!=='brain'); const n=others.length; const gap=(W-80)/(n-1);
+ let g=`<svg viewBox="0 0 ${W} ${H}">`;
+ const brain=bots.find(b=>b.id==='brain')||{state:'off'};
+ others.forEach((b,i)=>{const x=40+i*gap,y=178; const on=live&&b.state==='working';
+   g+=`<path d="M${bx} ${by+26} C ${bx} ${by+90}, ${x} ${y-100}, ${x} ${y-30}" fill="none" stroke="${on?'#5ee5ff':'rgba(94,229,255,.18)'}" stroke-width="${on?3:1.5}" ${on?'stroke-dasharray="8 4" style="animation:flow .6s linear infinite"':''}/>`;});
+ others.forEach((b,i)=>{const x=40+i*gap,y=178; const on=live&&b.state==='working'; const col=on?'#5ee5ff':(b.state==='blocked'?'#ffb53e':'#3a4652');
+   g+=`<g transform="translate(${x-26},${y-30}) scale(.65)">${botSVG(b.id+'L',live?b.state:'unknown').replace('class="bot"','width="80" height="80"')}</g><text x="${x}" y="${y+40}" fill="${on?'#f4f8fb':'#8fa3b5'}" font-size="12" font-weight="700" text-anchor="middle" font-family="Inter,Segoe UI,Arial">${b.name.replace(' (George)','')}</text>`;
+   if(on) g+=`<circle cx="${x}" cy="${y-2}" r="34" fill="none" stroke="#5ee5ff" stroke-opacity=".5"><animate attributeName="r" values="30;40;30" dur="1.6s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values=".6;0;.6" dur="1.6s" repeatCount="indefinite"/></circle>`;});
+ g+=`<g transform="translate(${bx-30},${by-34}) scale(.75)">${botSVG('brainL',live?brain.state:'unknown').replace('class="bot"','width="80" height="80"')}</g><text x="${bx+40}" y="${by-4}" fill="#f4f8fb" font-size="15" font-weight="800" font-family="Inter,Segoe UI,Arial">The Brain</text><text x="${bx+40}" y="${by+14}" fill="#8fa3b5" font-size="12" font-family="Inter,Segoe UI,Arial">hands each task to a bot, gets it back, passes it on</text></svg>`;
+ document.getElementById('line').innerHTML=g;
+}
 const LABEL={working:'WORKING',ready:'READY',idle:'IDLE',off:'OFF',blocked:'NEEDS SETUP'};
 function ago(ts){ if(!ts) return 'never'; const s=Date.now()/1000-ts; if(s<90) return 'just now'; if(s<3600) return Math.round(s/60)+' min ago'; if(s<86400) return Math.round(s/3600)+' h ago'; return Math.round(s/86400)+' d ago'; }
 const EP={'vending-machine':'Ep 1 · Vending machine','petrol-pump':'Ep 2 · Petrol pump'};
 async function load(){
  try{
-  const r=await fetch(SRC+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
-  const d=await r.json(); const age=Date.now()/1000-d.generated_at; const live=age<900;
+    const d=await getStatus(); const age=Date.now()/1000-d.generated_at; const live=age<900;
   const L=document.getElementById('live'); L.className='live '+(live?'on':'off');
   document.getElementById('liveTxt').textContent=live?'LIVE':'OFFLINE';
   document.getElementById('liveSub').textContent=(live?'last report ':'laptop not reporting · last report ')+ago(d.generated_at);
@@ -93,7 +124,11 @@ async function load(){
    const st=live?b.state:'unknown';
    return `<div class="card ${st}"><div class="top">${botSVG(b.id,st)}<div><h2>${b.name}</h2><p class="role">${b.role}</p></div></div>
    <span class="chip s-${st}">${live?(LABEL[b.state]||b.state.toUpperCase()):'UNKNOWN'}</span>
-   <div class="meta">${b.note||''}<br><em>Last job:</em> ${ago(b.last)}${b.episode?' · '+(EP[b.episode]||b.episode):''}${b.schedule?'<br><em>'+b.schedule+'</em>':''}</div></div>`;}).join('');
+   ${(live&&b.state==='working'&&b.task)?`<div class="task"><i>CURRENT TASK</i>${b.task}</div>`:''}<div class="meta">${b.note||''}<br><em>Last job:</em> ${ago(b.last)}${b.episode?' · '+(EP[b.episode]||b.episode):''}${(!(live&&b.state==='working')&&b.last_task)?'<br><em>Last task:</em> '+b.last_task:''}${b.schedule?'<br><em>'+b.schedule+'</em>':''}</div></div>`;}).join('');
+  drawLine(d.bots||[],live);
+  const f=d.feed||[]; const KI={handoff:'➜',done:'✓',run:'⚙',work:'✎'};
+  const KT={handoff:e=>`<b>Brain</b> handed <b>${e.name}</b> a task <span>· ${e.task}</span>`,done:e=>`<b>${e.name}</b> finished and handed back to the <b>Brain</b> <span>· ${e.task}</span>`,run:e=>`<b>Brain</b> ran <b>${e.name}</b>'s tool <span>· ${e.task}</span>`,work:e=>`<b>Brain</b> doing <b>${e.name}</b>'s work <span>· ${e.task}</span>`};
+  if(f.length) document.getElementById('feed').innerHTML=f.map(e=>`<div class="ev"><time>${new Date(e.t*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</time><div class="k k-${e.kind}">${KI[e.kind]||'•'}</div><div>${(KT[e.kind]||KT.run)(e)}</div></div>`).join('');
   document.getElementById('err').style.display='none';
  }catch(e){
   const L=document.getElementById('live'); L.className='live off'; document.getElementById('liveTxt').textContent='OFFLINE';
@@ -101,5 +136,5 @@ async function load(){
   const E=document.getElementById('err'); E.style.display='block'; E.textContent='No status report found yet. It appears after the studio laptop sends its first report.';
  }
 }
-load(); setInterval(load,60000);
+load(); setInterval(load,90000);
 </script></body></html>
