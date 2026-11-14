@@ -1,0 +1,219 @@
+{
+ "generated_at": 1794659424.4910793,
+ "generated_iso": "2026-11-14T12:30:24.491079Z",
+ "laptop": "DESKTOP-VKRMBR2",
+ "services": {
+  "dashboard": false,
+  "weekly_research_schedule": false,
+  "brain_window_open": true
+ },
+ "episodes": [
+  "car-differential",
+  "jet-engine",
+  "petrol-pump",
+  "vending-machine"
+ ],
+ "bots": [
+  {
+   "id": "brain",
+   "name": "The Brain",
+   "role": "Production supervisor (Claude Code)",
+   "last": 1794659248.4211822,
+   "episode": "petrol-pump",
+   "state": "working",
+   "note": "Running the production line"
+  },
+  {
+   "id": "researcher",
+   "name": "Researcher",
+   "role": "Finds topics, facts and sources",
+   "last": 1794635488.1280816,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "Petrol pump research",
+   "schedule": "Weekly research schedule not installed"
+  },
+  {
+   "id": "director-3d",
+   "name": "Director 3D",
+   "role": "Drawings, 3D lab scenes, camera",
+   "last": 1794642534.591004,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "running ep_edl"
+  },
+  {
+   "id": "scriptwriter",
+   "name": "Scriptwriter",
+   "role": "Writes the 8-minute script",
+   "last": 1794642334.582711,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "EP2 script writing"
+  },
+  {
+   "id": "fact-checker",
+   "name": "Fact-checker",
+   "role": "Checks every claim against sources",
+   "last": 1794642311.2762444,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "EP2 fact-check script"
+  },
+  {
+   "id": "voice",
+   "name": "Voice (George)",
+   "role": "Records the narration",
+   "last": 1794659248.4161482,
+   "episode": "petrol-pump",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "running voice.py"
+  },
+  {
+   "id": "editor",
+   "name": "Editor",
+   "role": "Films frames, edits, mixes, encodes",
+   "last": 1794642534.056,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "running capture.py"
+  },
+  {
+   "id": "thumbnail",
+   "name": "Thumbnail",
+   "role": "Designs thumbnails",
+   "last": 1794642337.859,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next",
+   "last_task": "running thumb_ep"
+  },
+  {
+   "id": "qa-reviewer",
+   "name": "QA Reviewer",
+   "role": "Runs quality checks",
+   "last": 1794548983.4942257,
+   "episode": "vending-machine",
+   "state": "ready",
+   "note": "Done its last job, ready for the next"
+  },
+  {
+   "id": "publisher",
+   "name": "Publisher",
+   "role": "Uploads to YouTube (private)",
+   "last": null,
+   "episode": "",
+   "state": "blocked",
+   "note": "YouTube API not set up yet: uploads are manual"
+  }
+ ],
+ "feed": [
+  {
+   "t": 1794649708.741,
+   "kind": "run",
+   "to": "voice",
+   "task": "running voice.py",
+   "name": "Voice (George)"
+  },
+  {
+   "t": 1794642541.902,
+   "kind": "run",
+   "to": "voice",
+   "task": "running beats.py",
+   "name": "Voice (George)"
+  },
+  {
+   "t": 1794642534.056,
+   "kind": "run",
+   "to": "editor",
+   "task": "running capture.py",
+   "n": 2,
+   "name": "Editor"
+  },
+  {
+   "t": 1794642463.594,
+   "kind": "run",
+   "to": "director-3d",
+   "task": "running ep_edl",
+   "name": "Director 3D"
+  },
+  {
+   "t": 1794642374.655,
+   "kind": "work",
+   "to": "editor",
+   "task": "Brain working on ep3_thumbs.py",
+   "name": "Editor"
+  },
+  {
+   "t": 1794642337.859,
+   "kind": "run",
+   "to": "thumbnail",
+   "task": "running thumb_ep",
+   "name": "Thumbnail"
+  },
+  {
+   "t": 1794642334.078,
+   "kind": "run",
+   "to": "voice",
+   "task": "running voice.py",
+   "n": 3,
+   "name": "Voice (George)"
+  },
+  {
+   "t": 1794640223.297,
+   "kind": "done",
+   "to": "fact-checker",
+   "task": "EP2 fact-check script",
+   "name": "Fact-checker"
+  },
+  {
+   "t": 1794640223.297,
+   "kind": "handoff",
+   "to": "fact-checker",
+   "task": "EP2 fact-check script",
+   "name": "Fact-checker"
+  },
+  {
+   "t": 1794639952.051,
+   "kind": "done",
+   "to": "scriptwriter",
+   "task": "EP2 script writing",
+   "name": "Scriptwriter"
+  },
+  {
+   "t": 1794639952.051,
+   "kind": "handoff",
+   "to": "scriptwriter",
+   "task": "EP2 script writing",
+   "name": "Scriptwriter"
+  },
+  {
+   "t": 1794635844.914,
+   "kind": "run",
+   "to": "editor",
+   "task": "running capture.py",
+   "name": "Editor"
+  },
+  {
+   "t": 1794635835.677,
+   "kind": "run",
+   "to": "director-3d",
+   "task": "running build_drawings",
+   "n": 6,
+   "name": "Director 3D"
+  },
+  {
+   "t": 1794635656.271,
+   "kind": "work",
+   "to": "director-3d",
+   "task": "Brain working on build_drawings.py",
+   "name": "Director 3D"
+  }
+ ]
+}
