@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spindle & Spark — Bot Status</title>
+<style>
+:root{--bg:#04070c;--ink:#f4f8fb;--steel:#d1dae3;--muted:#8fa3b5;--blue:#5ee5ff;--card:#0a1119;--line:rgba(94,229,255,.14);--amber:#ffb53e;--green:#3ef0a0;--red:#ff5a6a}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,Arial,sans-serif}
+body{background-image:linear-gradient(rgba(94,229,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(94,229,255,.05) 1px,transparent 1px);background-size:44px 44px;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:18px;justify-content:space-between;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:14px}.brand img{width:58px;height:58px;border-radius:50%;box-shadow:0 0 24px rgba(94,229,255,.4)}
+.brand small{display:block;font:600 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.28em;color:var(--blue)}
+.brand h1{margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:-.01em}
+.live{display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid var(--line);border-radius:999px;background:rgba(10,17,25,.9)}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--muted)}
+.live.on .dot{background:var(--green);box-shadow:0 0 0 0 rgba(62,240,160,.7);animation:pulse 1.6s infinite}
+.live.off .dot{background:var(--red)}
+.live b{font-size:15px;letter-spacing:.12em}.live span{color:var(--muted);font-size:13px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(62,240,160,.6)}70%{box-shadow:0 0 0 12px rgba(62,240,160,0)}100%{box-shadow:0 0 0 0 rgba(62,240,160,0)}}
+.services{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.svc{font-size:13px;padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--steel)}
+.svc i{font-style:normal;margin-right:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{position:relative;background:linear-gradient(180deg,#0c1520,#080d14);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;overflow:hidden}
+.card.working{border-color:rgba(94,229,255,.55);box-shadow:0 0 30px rgba(94,229,255,.18)}
+.card .top{display:flex;gap:14px;align-items:center}
+.bot{width:74px;height:74px;flex:none}
+.card.working .bot{animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.card h2{margin:0;font-size:18px;font-weight:800}.card p.role{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+.chip{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:6px 11px;border-radius:999px;font:700 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.14em}
+.chip:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.s-working{color:var(--blue);background:rgba(94,229,255,.12)}.s-working:before{animation:blink 1s infinite}
+.s-ready{color:var(--green);background:rgba(62,240,160,.1)}.s-idle{color:var(--steel);background:rgba(209,218,227,.08)}
+.s-off{color:var(--muted);background:rgba(143,163,181,.08)}.s-blocked{color:var(--amber);background:rgba(255,181,62,.12)}.s-unknown{color:var(--muted);background:rgba(143,163,181,.08)}
+@keyframes blink{50%{opacity:.25}}
+.meta{margin-top:10px;font-size:12.5px;color:var(--steel);line-height:1.5}.meta em{color:var(--muted);font-style:normal}
+footer{margin-top:28px;color:var(--muted);font-size:12.5px;line-height:1.6}
+footer a{color:var(--blue)}
+.err{padding:16px;border:1px solid rgba(255,90,106,.4);border-radius:12px;color:#ffc3c9;background:rgba(255,90,106,.06);margin-bottom:18px;display:none}
+</style></head>
+<body><div class="wrap">
+<header>
+  <div class="brand"><img src="../logo.png" alt="" onerror="this.style.display='none'"><div><small>SPINDLE &amp; SPARK · STUDIO</small><h1>Bot status</h1></div></div>
+  <div class="live" id="live"><div class="dot"></div><div><b id="liveTxt">CONNECTING…</b><br><span id="liveSub">reading the studio's latest report</span></div></div>
+</header>
+<div class="err" id="err"></div>
+<div class="services" id="svcs"></div>
+<div class="grid" id="grid"></div>
+<footer>How this works: the studio laptop checks its bots every 10 minutes (open windows, files each bot has written, schedules) and publishes the result. <b>LIVE</b> means a report arrived in the last 15 minutes; if the laptop is off or asleep the page shows <b>OFFLINE</b> instead of guessing. Bots only work when the Brain gives them a job, so <b>READY</b> is their normal resting state.<br>Lab: <a href="../">spindleandspark.github.io</a> · YouTube: <a href="https://www.youtube.com/@SpindleAndSpark">@SpindleAndSpark</a></footer>
+</div>
+<script>
+const SRC='https://raw.githubusercontent.com/spindleandspark/spindleandspark.github.io/status/status.json';
+const C={blue:'#5ee5ff',steel:'#d1dae3',ink:'#f4f8fb',dark:'#0d1620'};
+// Each bot: same family (round steel head, blue visor eyes, antenna spark) + its own tool on the chest.
+const TOOLS={
+ brain:`<path d="M30 63c-5 0-7-6-3-8-3-4 1-9 5-7 1-4 7-5 9-1 3-3 8-1 8 3 4 0 6 6 2 8 3 3 0 8-4 7-1 4-7 4-9 1-3 2-7 1-8-3z" fill="none" stroke="${C.blue}" stroke-width="2.4"/><circle cx="40" cy="58" r="2.4" fill="${C.blue}"/>`,
+ researcher:`<circle cx="37" cy="58" r="7" fill="none" stroke="${C.blue}" stroke-width="3"/><path d="M42 63l7 7" stroke="${C.blue}" stroke-width="3.4" stroke-linecap="round"/>`,
+ 'director-3d':`<rect x="27" y="53" width="20" height="13" rx="2.5" fill="none" stroke="${C.blue}" stroke-width="2.6"/><path d="M47 57l7-4v13l-7-4z" fill="${C.blue}"/>`,
+ scriptwriter:`<path d="M30 70l3-9 14-14 6 6-14 14z" fill="none" stroke="${C.blue}" stroke-width="2.6" stroke-linejoin="round"/><path d="M44 50l6 6" stroke="${C.blue}" stroke-width="2.6"/>`,
+ 'fact-checker':`<rect x="27" y="51" width="26" height="19" rx="4" fill="none" stroke="${C.blue}" stroke-width="2.6"/><path d="M33 60l5 5 9-10" fill="none" stroke="${C.blue}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+ voice:`<rect x="35" y="49" width="10" height="15" rx="5" fill="${C.blue}"/><path d="M30 60a10 10 0 0 0 20 0M40 70v-3" fill="none" stroke="${C.blue}" stroke-width="2.6" stroke-linecap="round"/>`,
+ editor:`<rect x="28" y="51" width="24" height="18" rx="2" fill="none" stroke="${C.blue}" stroke-width="2.6"/><path d="M28 56h24M28 64h24M34 51v18M46 51v18" stroke="${C.blue}" stroke-width="1.6"/>`,
+ thumbnail:`<rect x="27" y="51" width="26" height="18" rx="3" fill="none" stroke="${C.blue}" stroke-width="2.6"/><path d="M30 66l7-7 5 5 4-4 5 6" fill="none" stroke="${C.blue}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="46" cy="56" r="2" fill="${C.blue}"/>`,
+ 'qa-reviewer':`<path d="M40 49l11 4v7c0 6-5 10-11 12-6-2-11-6-11-12v-7z" fill="none" stroke="${C.blue}" stroke-width="2.6" stroke-linejoin="round"/><path d="M35 60l4 4 7-7" fill="none" stroke="${C.blue}" stroke-width="2.6" stroke-linecap="round"/>`,
+ publisher:`<path d="M40 48c6 4 8 11 6 18h-12c-2-7 0-14 6-18z" fill="none" stroke="${C.blue}" stroke-width="2.6" stroke-linejoin="round"/><circle cx="40" cy="57" r="2.6" fill="${C.blue}"/><path d="M36 70l4 4 4-4" stroke="#ffb53e" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+};
+function botSVG(id,state){
+ const eye= state==='off'?'#3a4652': state==='blocked'?'#ffb53e':C.blue;
+ return `<svg class="bot" viewBox="0 0 80 80"><defs><linearGradient id="g${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f8fb"/><stop offset="1" stop-color="#8fa3b5"/></linearGradient><filter id="f${id}"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+ <line x1="40" y1="6" x2="40" y2="14" stroke="${C.steel}" stroke-width="2.4"/><circle cx="40" cy="5" r="3.4" fill="${eye}" filter="url(#f${id})"/><circle cx="40" cy="5" r="2.2" fill="${eye}"/>
+ <rect x="16" y="14" width="48" height="30" rx="13" fill="url(#g${id})"/><rect x="11" y="23" width="6" height="12" rx="3" fill="${C.steel}"/><rect x="63" y="23" width="6" height="12" rx="3" fill="${C.steel}"/>
+ <rect x="22" y="21" width="36" height="16" rx="8" fill="${C.dark}"/><rect x="28" y="26" width="8" height="6" rx="3" fill="${eye}" filter="url(#f${id})"/><rect x="44" y="26" width="8" height="6" rx="3" fill="${eye}" filter="url(#f${id})"/><rect x="28" y="26" width="8" height="6" rx="3" fill="${eye}"/><rect x="44" y="26" width="8" height="6" rx="3" fill="${eye}"/>
+ <rect x="22" y="45" width="36" height="31" rx="10" fill="#101b26" stroke="rgba(94,229,255,.35)"/>${TOOLS[id]||''}</svg>`;
+}
+const LABEL={working:'WORKING',ready:'READY',idle:'IDLE',off:'OFF',blocked:'NEEDS SETUP'};
+function ago(ts){ if(!ts) return 'never'; const s=Date.now()/1000-ts; if(s<90) return 'just now'; if(s<3600) return Math.round(s/60)+' min ago'; if(s<86400) return Math.round(s/3600)+' h ago'; return Math.round(s/86400)+' d ago'; }
+const EP={'vending-machine':'Ep 1 · Vending machine','petrol-pump':'Ep 2 · Petrol pump'};
+async function load(){
+ try{
+  const r=await fetch(SRC+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+  const d=await r.json(); const age=Date.now()/1000-d.generated_at; const live=age<900;
+  const L=document.getElementById('live'); L.className='live '+(live?'on':'off');
+  document.getElementById('liveTxt').textContent=live?'LIVE':'OFFLINE';
+  document.getElementById('liveSub').textContent=(live?'last report ':'laptop not reporting · last report ')+ago(d.generated_at);
+  const s=d.services||{};
+  document.getElementById('svcs').innerHTML=[
+   ['🧠','Brain window', s.brain_window_open?'open':'closed'],
+   ['📟','Local dashboard', s.dashboard?'running':'not running'],
+   ['📅','Weekly research', s.weekly_research_schedule?'scheduled':'not scheduled'],
+   ['🎬','Episodes', (d.episodes||[]).length]
+  ].map(([i,k,v])=>`<div class="svc"><i>${i}</i>${k}: <b>${v}</b></div>`).join('');
+  document.getElementById('grid').innerHTML=(d.bots||[]).map(b=>{
+   const st=live?b.state:'unknown';
+   return `<div class="card ${st}"><div class="top">${botSVG(b.id,st)}<div><h2>${b.name}</h2><p class="role">${b.role}</p></div></div>
+   <span class="chip s-${st}">${live?(LABEL[b.state]||b.state.toUpperCase()):'UNKNOWN'}</span>
+   <div class="meta">${b.note||''}<br><em>Last job:</em> ${ago(b.last)}${b.episode?' · '+(EP[b.episode]||b.episode):''}${b.schedule?'<br><em>'+b.schedule+'</em>':''}</div></div>`;}).join('');
+  document.getElementById('err').style.display='none';
+ }catch(e){
+  const L=document.getElementById('live'); L.className='live off'; document.getElementById('liveTxt').textContent='OFFLINE';
+  document.getElementById('liveSub').textContent='no report published yet';
+  const E=document.getElementById('err'); E.style.display='block'; E.textContent='No status report found yet. It appears after the studio laptop sends its first report.';
+ }
+}
+load(); setInterval(load,60000);
+</script></body></html>

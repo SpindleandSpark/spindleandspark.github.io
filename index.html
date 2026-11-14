@@ -15,13 +15,13 @@
   .brand h1 { margin:4px 0 0; font-weight:800; font-size:22px; }
   .brand p { margin:4px 0 0; font-size:12.5px; color:var(--muted); line-height:1.45; }
   .shots { position:fixed; left:22px; top:122px; display:flex; flex-direction:column; gap:6px; z-index:5; width:250px; }
-  .shot { background:var(--glass); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid rgba(94,229,255,.14);
+  .shot { background:rgba(4,7,12,.86); border:1px solid rgba(94,229,255,.14);
           border-radius:10px; padding:8px 11px; cursor:pointer; transition:all .2s; }
   .shot:hover { border-color:rgba(18,184,220,.5); }
   .shot.on { border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan); background:rgba(10,24,34,.92); }
   .shot b { font-weight:800; font-size:13px; letter-spacing:.04em; } .shot span { font:400 10.5px 'JetBrains Mono',monospace; color:var(--muted); display:block; margin-top:2px; }
   .dock { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:5; display:flex; gap:16px; align-items:center;
-          background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(94,229,255,.14);
+          background:rgba(4,7,12,.86); border:1px solid rgba(94,229,255,.14);
           border-radius:14px; padding:10px 16px; }
   .ctl { display:flex; flex-direction:column; gap:4px; } .ctl label { font:600 10px 'JetBrains Mono',monospace; letter-spacing:.12em; color:var(--muted); }
   .ctl input { width:130px; accent-color:var(--cyan); }
@@ -37,7 +37,6 @@
   @media (max-width:900px){ .shots{ top:auto; bottom:110px; right:22px; width:auto; flex-direction:row; overflow-x:auto; } .shot{min-width:120px;} .brand p,.hint{display:none;} .dock{flex-wrap:wrap; width:calc(100% - 24px); justify-content:center;} }
   body.filming .shots { display:none !important; }
   body.clean .brand, body.clean .shots, body.clean .dock, body.clean .hint, body.clean #labels { display:none !important; }
-  #stage canvas { filter: contrast(1.12) saturate(1.25); }
   body.prod #word { display:none !important; }
   #pw { position:fixed; left:50%; top:16%; transform:translate(-50%,-50%); z-index:5; pointer-events:none; font-weight:800; font-size:min(9vw,120px); letter-spacing:.04em; color:#e9f6ff; text-shadow:0 0 22px rgba(94,229,255,.55),0 2px 30px rgba(0,0,0,.8); opacity:0; font-family:Inter,Arial,sans-serif; }
 </style>
@@ -67,11 +66,12 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 const V3 = THREE.Vector3;
 
 // ---------------------------------------------------------------- studio
 const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+let PR = Math.min(devicePixelRatio, 1.5); renderer.setPixelRatio(PR); renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('stage').appendChild(renderer.domElement);
@@ -93,7 +93,7 @@ controls.maxPolarAngle = Math.PI * 0.52; controls.minDistance = 0.35; controls.m
 const floor = new THREE.Mesh(new THREE.CircleGeometry(25, 96), new THREE.MeshLambertMaterial({ color: '#05080d' }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 const key = new THREE.DirectionalLight('#fff', 2.0); key.position.set(3, 6, 4); key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -2, right: 2, top: 3, bottom: -1 }); key.shadow.radius = 5; key.shadow.bias = -0.0005;
+key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, { left: -2, right: 2, top: 3, bottom: -1 }); key.shadow.radius = 5; key.shadow.bias = -0.0005;
 scene.add(key); const rim = new THREE.DirectionalLight('#5ee5ff', 1.7); rim.position.set(-4, 3, -4); scene.add(rim);
 scene.add(new THREE.HemisphereLight('#dff1ff', '#000000', 0.32));
 const fillW = new THREE.DirectionalLight('#ffffff', 0.55); fillW.position.set(-2.5, 2.2, 4); scene.add(fillW); // white lab fill keeps the subject brightest
@@ -104,7 +104,9 @@ const ringMat = new THREE.MeshBasicMaterial({ color: '#5ee5ff', transparent: tru
 const ring = new THREE.Mesh(new THREE.TorusGeometry(1.29, 0.009, 10, 192), ringMat); ring.rotation.x = Math.PI / 2; ring.position.y = 0.0; scene.add(ring);
 const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.007, 10, 192), new THREE.MeshBasicMaterial({ color: '#d1dae3', transparent: true, opacity: 0.22, fog: false, depthWrite: false })); ring2.rotation.x = Math.PI / 2; ring2.position.y = -0.045; scene.add(ring2);
 const composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.22, 0.35, 0.95)); composer.addPass(new OutputPass());
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.22, 0.35, 0.95)); composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); vec3 x = (c.rgb - 0.5) * 1.12 + 0.5; float l = dot(x, vec3(0.2126, 0.7152, 0.0722)); x = mix(vec3(l), x, 1.25); gl_FragColor = vec4(clamp(x, 0.0, 1.0), c.a); }' })); // same grade as the old CSS contrast/saturate, on the GPU
 
 // ---------------------------------------------------------------- living backdrop (render standard: background supplements the subject)
 const ACC = { whole:'#7f8fa0', coin:'#d99a2b', note:'#3fa47c', brain:'#1fa9c9', spiral:'#e8742f', beam:'#de4f92', cold:'#4c9fe0' };
@@ -120,7 +122,7 @@ const scTex = new THREE.CanvasTexture(scC); scTex.wrapS = THREE.RepeatWrapping; 
 const scanMat = new THREE.MeshBasicMaterial({ map: scTex, transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.BackSide, fog: false, color: '#fff' });
 const scan = new THREE.Mesh(new THREE.CylinderGeometry(WR - 0.02, WR - 0.02, WH, 96, 1, true, Math.PI - WT / 2, WT), scanMat); scan.position.y = WH / 2; scene.add(scan);
 // dust motes that drift through the light and take the subject's colour
-const DN = 700, dpos = new Float32Array(DN * 3);
+const DN = 400, dpos = new Float32Array(DN * 3);
 for (let i = 0; i < DN; i++) { dpos[i*3] = (Math.random() - 0.5) * 6; dpos[i*3+1] = Math.random() * 3.2; dpos[i*3+2] = (Math.random() - 0.5) * 5 - 0.5; }
 const dgeo = new THREE.BufferGeometry(); dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
 const dC = document.createElement('canvas'); dC.width = dC.height = 64; const dx = dC.getContext('2d'); const dg = dx.createRadialGradient(32,32,0,32,32,32); dg.addColorStop(0,'rgba(255,255,255,1)'); dg.addColorStop(1,'rgba(255,255,255,0)'); dx.fillStyle = dg; dx.fillRect(0,0,64,64);
@@ -425,6 +427,7 @@ const clock = new THREE.Clock(); let T = 0;
 const target = spirals.find(s => s.row === 2 && s.col === 2);
 const base = target.packets.map(p => p.position.clone());
 function ease(x) { return x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x); }
+const perf = { n: 0, t: performance.now() };
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05); if (state.play) T += dt;
@@ -462,6 +465,8 @@ function animate() {
   scTex.offset.x = (T * 0.035) % 1; wallMat.opacity = 0.8;
   { const P = dgeo.attributes.position; for (let i = 0; i < DN; i++) { let y = P.getY(i) + dt * 0.05; if (y > 3.2) y = 0; P.setY(i, y); P.setX(i, P.getX(i) + Math.sin(T * 0.3 + i) * dt * 0.01); } P.needsUpdate = true; }
   controls.update(); composer.render(); labelR.render(scene, camera);
+  perf.n++; const pn = performance.now(); if (pn - perf.t > 2000) { const fps = perf.n * 1000 / (pn - perf.t); perf.n = 0; perf.t = pn;
+    if (fps < 45 && PR > 0.75) { PR = Math.max(0.75, PR - 0.25); renderer.setPixelRatio(PR); composer.setPixelRatio ? composer.setPixelRatio(PR) : 0; composer.setSize(innerWidth, innerHeight); } }
 }
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labelR.setSize(innerWidth, innerHeight); });
 SHOTS.forEach(s => { drawBackdrop(s.id, s.word); renderer.initTexture(wallMat.map); });
