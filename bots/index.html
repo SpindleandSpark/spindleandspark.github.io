@@ -127,7 +127,7 @@ async function load(){
    ${(live&&b.state==='working'&&b.task)?`<div class="task"><i>CURRENT TASK</i>${b.task}</div>`:''}<div class="meta">${b.note||''}<br><em>Last job:</em> ${ago(b.last)}${b.episode?' · '+(EP[b.episode]||b.episode):''}${(!(live&&b.state==='working')&&b.last_task)?'<br><em>Last task:</em> '+b.last_task:''}${b.schedule?'<br><em>'+b.schedule+'</em>':''}</div></div>`;}).join('');
   drawLine(d.bots||[],live);
   const f=d.feed||[]; const KI={handoff:'➜',done:'✓',run:'⚙',work:'✎'};
-  const KT={handoff:e=>`<b>Brain</b> handed <b>${e.name}</b> a task <span>· ${e.task}</span>`,done:e=>`<b>${e.name}</b> finished and handed back to the <b>Brain</b> <span>· ${e.task}</span>`,run:e=>`<b>Brain</b> ran <b>${e.name}</b>'s tool <span>· ${e.task}</span>`,work:e=>`<b>Brain</b> doing <b>${e.name}</b>'s work <span>· ${e.task}</span>`};
+  const KT={handoff:e=>`<b>Brain</b> handed <b>${e.name}</b> a task <span>· ${e.task}</span>`,done:e=>`<b>${e.name}</b> finished and handed back to the <b>Brain</b> <span>· ${e.task}</span>`,run:e=>`<b>${e.name}</b> at work <span>· ${e.task}${e.n>1?' · '+e.n+' steps':''}</span>`,work:e=>`<b>${e.name}</b> at work <span>· ${e.task}${e.n>1?' · '+e.n+' steps':''}</span>`};
   if(f.length) document.getElementById('feed').innerHTML=f.map(e=>`<div class="ev"><time>${new Date(e.t*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</time><div class="k k-${e.kind}">${KI[e.kind]||'•'}</div><div>${(KT[e.kind]||KT.run)(e)}</div></div>`).join('');
   document.getElementById('err').style.display='none';
  }catch(e){
