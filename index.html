@@ -60,12 +60,12 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px}footer a{color:var(--steel);te
   <div class="kicker">The Spindle &amp; Spark Lab</div>
   <h1>Interactive 3D models of <span>everyday machines</span>.</h1>
   <p class="lead">A free, open library of the machines we take apart on the channel. Open any model, spin it, X-ray it and follow every part as it works — right in your browser, on any device.</p>
-  <div class="stats"><div><b id="nLive">0</b>models in the Lab</div><div><b id="nSoon">0</b>on the bench</div></div>
+  <div class="stats"><div><b id="nLive">0</b>model in the Lab</div><div id="soonBox"><b id="nSoon">0</b>on the bench</div></div>
 </div></div>
 
 <main id="library"><div class="wrap">
   <div class="tools">
-    <label class="search">&#128269;<input id="q" type="search" placeholder="Search machines and parts — e.g. coin, nozzle, compressor"></label>
+    <label class="search">&#128269;<input id="q" type="search" placeholder="Search machines and parts — e.g. coin, note reader, compressor"></label>
     <div id="chips"></div>
   </div>
   <div class="grid" id="grid"></div>
@@ -84,13 +84,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px}footer a{color:var(--steel);te
 const MODELS=[
  {id:"vending-machine",name:"The Vending Machine",status:"live",category:"Shop & street",img:"assets/vending-machine.jpg",
   text:"How it feels your coin, reads your note, drops one snack and keeps it all cold.",
-  parts:["coin track","copper coils","accept gate","note reader","stacker","spiral motor","infrared curtain","controller","compressor","condenser","evaporator"]},
- {id:"petrol-pump",name:"The Petrol Pump",status:"live",category:"Cars & fuel",img:"assets/petrol-pump.jpg",
-  text:"How the nozzle knows your tank is full and clicks off on its own — no sensor, no chip.",
-  parts:["nozzle","venturi","sensing tube","diaphragm","latch","hose","meter","underground tank"]},
- {id:"excavator-arm",name:"The Excavator Arm",status:"soon",category:"Building & digging",img:"",
-  text:"How oil under pressure lifts tonnes of earth. Joins the Lab with its episode.",
-  parts:["hydraulic cylinder","pump","valve","boom","bucket"]}
+  parts:["coin track","copper coils","accept gate","note reader","stacker","spiral motor","infrared curtain","controller","compressor","condenser","evaporator"]}
 ];
 const grid=document.getElementById('grid'),q=document.getElementById('q'),chips=document.getElementById('chips');
 const cats=["All",...new Set(MODELS.map(m=>m.category))];let cat="All";
@@ -114,7 +108,7 @@ grid.onclick=e=>{const s=e.target.closest('[data-share]');if(!s)return;e.prevent
   const url=location.origin+location.pathname.replace(/[^/]*$/,'')+s.dataset.share+'/';
   try{navigator.clipboard.writeText(url);s.textContent="Link copied";setTimeout(()=>s.textContent="Copy link",1600)}catch(err){prompt("Copy this link:",url)}};
 document.getElementById('nLive').textContent=MODELS.filter(m=>m.status==="live").length;
-document.getElementById('nSoon').textContent=MODELS.filter(m=>m.status!=="live").length;
+const ns=MODELS.filter(m=>m.status!=="live").length;document.getElementById('nSoon').textContent=ns;if(!ns)document.getElementById('soonBox').style.display='none';if(new Set(MODELS.map(m=>m.category)).size<2)document.getElementById('chips').style.display='none';
 document.getElementById('y').textContent=new Date().getFullYear();draw();
 </script>
 </body>
