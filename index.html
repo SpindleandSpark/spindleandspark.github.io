@@ -111,5 +111,17 @@ document.getElementById('nLive').textContent=MODELS.filter(m=>m.status==="live")
 const ns=MODELS.filter(m=>m.status!=="live").length;document.getElementById('nSoon').textContent=ns;if(!ns)document.getElementById('soonBox').style.display='none';if(new Set(MODELS.map(m=>m.category)).size<2)document.getElementById('chips').style.display='none';
 document.getElementById('y').textContent=new Date().getFullYear();draw();
 </script>
+<script data-goatcounter="https://spindlespark.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+/* Spindle & Spark: private visit stats (GoatCounter, no cookies) */
+(function(){var q=[];function ev(n,t){var f=function(){if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path:n,title:t||n,event:true});return true}return false};if(!f())q.push(f)}
+setInterval(function(){q=q.filter(function(f){return !f()})},1500);
+document.addEventListener('click',function(e){var a=e.target.closest('a,button,.shot');if(!a)return;var h=a.getAttribute&&a.getAttribute('href')||'';
+if(h.indexOf('youtube.com')>-1)return ev('home-youtube-click','Clicked YouTube');
+if(a.dataset&&a.dataset.share)return ev('home-copy-link-'+a.dataset.share,'Copied link');if(/^[a-z-]+\/$/.test(h))return ev('home-open-'+h.replace('/',''),'Opened model');
+},true);
+var t0=Date.now(),sent={};function stay(){var s=(Date.now()-t0)/1000;[30,60,180].forEach(function(k){if(s>=k&&!sent[k]){sent[k]=1;ev('home-stayed-'+k+'s','Stayed '+k+'s+')}})}
+setInterval(stay,5000);})();
+</script>
 </body>
 </html>

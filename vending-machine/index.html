@@ -512,5 +512,17 @@ go(startShot); animate();
 window.__look = { camera, controls, applyMaterials, stopFly: () => { fly = null; }, setBd: (id, w) => drawBackdrop(id, w), film, filmStart, filmAt: t => { film.on = true; controls.enabled = false; controls.minDistance = 0.01; film.last = -1; for (let x = 0; x <= t; x += 0.05) filmAt(x); }, scene, floor, key, rim, renderer, wallMat, M, pov: (i, p, t, f = 50) => { go(i); fly = null; controls.autoRotate = false; state.orbit = false; controls.minDistance = 0.01; camera.position.set(...p); controls.target.set(...t); camera.fov = f; camera.updateProjectionMatrix(); controls.update(); }, fov: f => { camera.fov = f; camera.updateProjectionMatrix(); }, go, state, clean: on => document.body.classList.toggle('clean', on), seek: v => { T = v; } };
 </script>
 <a href="../" id="ss-home" style="position:fixed;top:14px;left:14px;z-index:9999;font:600 13px/1 system-ui,Segoe UI,sans-serif;color:#eaf6ff;background:rgba(4,7,12,.72);border:1px solid rgba(94,229,255,.45);padding:9px 13px;border-radius:999px;text-decoration:none;letter-spacing:.04em">&larr; Spindle &amp; Spark Lab</a>
+<script data-goatcounter="https://spindlespark.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+/* Spindle & Spark: private visit stats (GoatCounter, no cookies) */
+(function(){var q=[];function ev(n,t){var f=function(){if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path:n,title:t||n,event:true});return true}return false};if(!f())q.push(f)}
+setInterval(function(){q=q.filter(function(f){return !f()})},1500);
+document.addEventListener('click',function(e){var a=e.target.closest('a,button,.shot');if(!a)return;var h=a.getAttribute&&a.getAttribute('href')||'';
+if(h.indexOf('youtube.com')>-1)return ev('vm-youtube-click','Clicked YouTube');
+if(a.classList.contains('shot'))return ev('vm-shot-'+(a.querySelector('b')||a).textContent.trim().toLowerCase().replace(/\s+/g,'-'),'Shot');if(a.id)return ev('vm-button-'+a.id,'Button '+a.id);
+},true);
+var t0=Date.now(),sent={};function stay(){var s=(Date.now()-t0)/1000;[30,60,180].forEach(function(k){if(s>=k&&!sent[k]){sent[k]=1;ev('vm-stayed-'+k+'s','Stayed '+k+'s+')}})}
+setInterval(stay,5000);})();
+</script>
 </body>
 </html>
